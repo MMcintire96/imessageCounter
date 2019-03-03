@@ -127,6 +127,8 @@ try:
         num = args.number
         user = TargetUser(num)
         print(user.sentiment)
+        print(user.my_sentiment)
+        print(user.messages)
 except Exception as e:
     pass
 
