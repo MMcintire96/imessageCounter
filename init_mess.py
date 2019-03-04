@@ -6,7 +6,6 @@ import datetime
 import cv2
 import json
 
-
 class Users(object):
 
     def __init__(self):
@@ -34,6 +33,7 @@ class Users(object):
             }
             users.append(user)
         return users
+
 
 class TargetUser(object):
 
@@ -102,16 +102,15 @@ class TargetUser(object):
 
     def avg_sentiment(self, **kwargs):
         '''Returns the averages of the users sentiment'''
-        print(len(kwargs))
         user_lst, me_lst = self.get_messages()
         user_pol, user_subj = 0, 0
         me_pol, me_subj = 0, 0
         for usr_item in user_lst:
-            tb_data = TextBlob(usr_item['text'])
+            tb_data = TextBlob(str(usr_item['text']))
             user_pol += tb_data.sentiment.polarity
             user_subj += tb_data.sentiment.subjectivity
         for me_item in me_lst:
-            tb_data = TextBlob(me_item['text'])
+            tb_data = TextBlob(str(me_item['text']))
             me_pol += tb_data.sentiment.polarity
             me_subj += tb_data.sentiment.subjectivity
         usr_sent = {'polarity': user_pol/len(user_lst), 'subjectivity': user_subj/len(user_lst)}
@@ -158,18 +157,20 @@ def show_attachments():
     f_lst = user.list_attach()
     formats = ['jpeg', 'jpg', 'png']
     for f in f_lst:
-        f = f.split('~')[1]
-        if f.split('.')[1].lower() in formats:
-            f = os.path.expanduser('~') + f
+        try:
+            f = f.split('~')[1]
             print('File_name %s' %f)
-            img = cv2.imread(f)
-            cv2.imshow('output', img)
-            # press any key to go next or q to quit
-            if cv2.waitKey(0) & 0xFF == ord('q'):
-                break
-        else:
-            pass
-
+            if f.split('.')[1].lower() in formats:
+                f = os.path.expanduser('~') + f
+                img = cv2.imread(f)
+                cv2.imshow('output', img)
+                # press any key to go next or q to quit
+                if cv2.waitKey(0) & 0xFF == ord('q'):
+                    break
+            else:
+                pass
+        except Exception as e:
+            print(str(e))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -181,8 +182,17 @@ if __name__ == '__main__':
         else:
             num = args.number
             user = TargetUser(num)
+            print(usr_mess)
     except Exception as e:
         pass
-    usr_mess, me_mess = user.get_messages()
-    print(user.list_attach())
+    #show_attachments()
 
+usr_mess, me_mess = user.get_messages()
+print(json.dumps(usr_mess, indent=4), file=open('User_out.txt', 'w'))
+print(json.dumps(me_mess, indent=4), file=open('Me_out.txt', 'w'))
+usr_sent, me_sent = user.avg_sentiment(contains='both')
+print("Stats on the user ")
+print(usr_sent)
+print("Stats on you ")
+print(me_sent)
+print('\nSee the output files in this dir')
