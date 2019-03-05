@@ -154,6 +154,7 @@ class TargetUser(object):
 
 
 def show_attachments():
+    '''Shows all your attachments in a cv2 window'''
     f_lst = user.list_attach()
     formats = ['jpeg', 'jpg', 'png']
     for f in f_lst:
@@ -179,14 +180,15 @@ if __name__ == '__main__':
     try:
         if args.number == None:
             print('Enter a number with the --number <number> flag')
+            print('Calling with "all"')
+            num = 'all'
         else:
             num = args.number
-            user = TargetUser(num)
-            print(usr_mess)
     except Exception as e:
         pass
-    #show_attachments()
 
+
+user = TargetUser(num)
 usr_mess, me_mess = user.get_messages()
 print(json.dumps(usr_mess, indent=4), file=open('User_out.txt', 'w'))
 print(json.dumps(me_mess, indent=4), file=open('Me_out.txt', 'w'))
