@@ -1,0 +1,19 @@
+tell application "Finder"
+    set AppNames to name of every process whose visible is true
+    set cont to true
+    if "obs" is in AppNames then
+        repeat while cont
+            tell application "System Events"
+                tell process "NotificationCenter"
+                    set numwins to (count windows)
+                    repeat with i from numwins to 1 by -1
+                        if description of image 2 of window i is "Messages" then
+                            click button "Mark as Read" of window i
+                        end if
+                    end repeat
+                end tell
+            end tell
+            set cont to true
+        end repeat
+    end if
+end tell

@@ -1,0 +1,10 @@
+on run argv
+    set msg to item 1 of argv
+    set buddyCont to item 2 of argv
+    using terms from application "Messages"
+        tell application "Messages"
+            set myid to get id of first service
+            send msg to buddy buddyCont of service id myid
+        end tell
+    end using terms from
+end run
