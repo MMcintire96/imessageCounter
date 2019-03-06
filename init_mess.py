@@ -31,8 +31,7 @@ class Users(object):
                 'id': row[0],
                 'num': row[1],
             }
-            users.append(user)
-        return users
+            yield user
 
 
 class TargetUser(object):
@@ -83,22 +82,28 @@ class TargetUser(object):
     # TODO convert time int readable after the average
     ''' what if we take the derivative as lim x-> 0 '''
     def text_time(self):
-        user_msgs = self.messages
-        my_msgs = self.my_responses
+        user_msgs, my_msgs = self.get_messages()
         user_times = ([x['unix_date'] for x in user_msgs])
         my_times = ([x['unix_date'] for x in my_msgs])
         all_times = user_times + my_times
-        user_minus_my = 0
-        print(len(user_times))
-        print(len(my_times))
-        for t in all_times:
+        print(json.dumps(user_times, indent=4), file=open('u.txt', 'w'))
+        print(json.dumps(my_times, indent=4), file=open('m.txt', 'w'))
+        if len(user_times) > len(my_times):
+            r = len(my_times)
+        else:
+            r = len(user_times)
+        times = []
+        for t in range(r):
             try:
-                user_minus_my += user_times[0] - my_times[0]
+                time_slope = (user_times[0] - my_times[0]) / 60
                 user_times.pop(0)
                 my_times.pop(0)
+                times.append(time_slope)
             except Exception as e:
                 pass
-        print(user_minus_my)
+        avg_time = sum(times)/len(times)
+        t = self.convert_date(str(int(avg_time)))
+        print(t)
 
     def avg_sentiment(self, **kwargs):
         '''Returns the averages of the users sentiment'''
@@ -151,8 +156,6 @@ class TargetUser(object):
         return file_lst
 
 
-
-
 def show_attachments():
     '''Shows all your attachments in a cv2 window'''
     f_lst = user.list_attach()
@@ -188,13 +191,13 @@ if __name__ == '__main__':
         pass
 
 
-user = TargetUser(num)
-usr_mess, me_mess = user.get_messages()
-print(json.dumps(usr_mess, indent=4), file=open('User_out.txt', 'w'))
-print(json.dumps(me_mess, indent=4), file=open('Me_out.txt', 'w'))
-usr_sent, me_sent = user.avg_sentiment(contains='both')
-print("Stats on the user ")
-print(usr_sent)
-print("Stats on you ")
-print(me_sent)
-print('\nSee the output files in this dir')
+    user = TargetUser(num)
+    usr_mess, me_mess = user.get_messages()
+    print(json.dumps(usr_mess, indent=4), file=open('User_out.txt', 'w'))
+    print(json.dumps(me_mess, indent=4), file=open('Me_out.txt', 'w'))
+    usr_sent, me_sent = user.avg_sentiment(contains='both')
+    print("Stats on the %s" %num)
+    print(usr_sent)
+    print("Stats on You: ")
+    print(me_sent)
+    print('\nSee the output files in this dir')
